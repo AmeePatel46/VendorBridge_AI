@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 0; background: #f0f2f5; }
+    .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+    .navbar a { color: white; text-decoration: none; margin-left: 20px; }
+    .content { padding: 30px; }
+    .cards { display: flex; gap: 20px; flex-wrap: wrap; }
+    .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-width: 180px; text-align: center; }
+    .card h3 { margin: 0; font-size: 2em; color: #4f46e5; }
+    .card p { color: #666; margin: 5px 0 0; }
+    button { padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <b>VendorBridge</b>
+    <div>
+      <a href="vendors.html">Vendors</a>
+      <a href="rfq.html">RFQs</a>
+      <a href="quotations.html">Quotations</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="purchase_orders.html">Purchase Orders</a>
+      <a href="invoices.html">Invoices</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </div>
+  <div class="content">
+    <h2>Dashboard</h2>
+    <div class="cards">
+      <div class="card"><h3 id="rfq-count">0</h3><p>Active RFQs</p></div>
+      <div class="card"><h3 id="po-count">0</h3><p>Purchase Orders</p></div>
+      <div class="card"><h3 id="inv-count">0</h3><p>Invoices</p></div>
+      <div class="card"><h3 id="vendor-count">0</h3><p>Vendors</p></div>
+    </div>
+  </div>
+  <script src="js/api.js"></script>
+  <script>
+    async function loadStats() {
+      const [rfqs, pos, invoices, vendors] = await Promise.all([
+        apiFetch("/rfqs/"),
+        apiFetch("/purchase-orders/"),
+        apiFetch("/invoices/"),
+        apiFetch("/vendors/")
+      ]);
+      document.getElementById("rfq-count").innerText = rfqs.length || 0;
+      document.getElementById("po-count").innerText = pos.length || 0;
+      document.getElementById("inv-count").innerText = invoices.length || 0;
+      document.getElementById("vendor-count").innerText = vendors.length || 0;
+    }
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+    loadStats();
+  </script>
+</body>
+</html>

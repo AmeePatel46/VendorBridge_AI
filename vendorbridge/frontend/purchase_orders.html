@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Purchase Orders</title>
+  <style>
+    body { font-family: Arial; margin: 0; background: #f0f2f5; }
+    .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; }
+    .navbar a { color: white; text-decoration: none; margin-left: 20px; }
+    .content { padding: 30px; }
+    .form-box { background: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; }
+    input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 5px; width: 200px; }
+    button { padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+    th { background: #4f46e5; color: white; padding: 12px; text-align: left; }
+    td { padding: 12px; border-bottom: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <b>VendorBridge</b>
+    <div>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="invoices.html">Invoices</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </div>
+  <div class="content">
+    <h2>Purchase Orders</h2>
+    <div class="form-box">
+      <h3>Generate PO</h3>
+      <input id="quotation_id" type="number" placeholder="Approved Quotation ID"/>
+      <input id="tax" type="number" placeholder="Tax %" value="18"/>
+      <br>
+      <button onclick="createPO()">Generate Purchase Order</button>
+    </div>
+    <table>
+      <thead><tr><th>PO Number</th><th>Quotation ID</th><th>Total Amount</th><th>Tax %</th><th>Status</th></tr></thead>
+      <tbody id="po-list"></tbody>
+    </table>
+  </div>
+  <script src="js/api.js"></script>
+  <script>
+    async function createPO() {
+      const res = await apiFetch("/purchase-orders/", "POST", {
+        quotation_id: parseInt(document.getElementById("quotation_id").value),
+        tax: parseFloat(document.getElementById("tax").value)
+      });
+      alert(res.po_number ? `PO Created: ${res.po_number}` : JSON.stringify(res));
+      loadPOs();
+    }
+    async function loadPOs() {
+      const pos = await apiFetch("/purchase-orders/");
+      document.getElementById("po-list").innerHTML = pos.map(p => `
+        <tr>
+          <td>${p.po_number}</td><td>${p.quotation_id}</td>
+          <td>₹${p.total_amount.toFixed(2)}</td><td>${p.tax}%</td>
+          <td>${p.status}</td>
+        </tr>`).join("");
+    }
+    function logout() { localStorage.clear(); window.location.href = "index.html"; }
+    loadPOs();
+  </script>
+</body>
+</html>

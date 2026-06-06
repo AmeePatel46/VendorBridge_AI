@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Invoices</title>
+  <style>
+    body { font-family: Arial; margin: 0; background: #f0f2f5; }
+    .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; }
+    .navbar a { color: white; text-decoration: none; margin-left: 20px; }
+    .content { padding: 30px; }
+    .form-box { background: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; }
+    input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 5px; width: 200px; }
+    button { padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+    th { background: #4f46e5; color: white; padding: 12px; text-align: left; }
+    td { padding: 12px; border-bottom: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <b>VendorBridge</b>
+    <div>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="purchase_orders.html">POs</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </div>
+  <div class="content">
+    <h2>Invoices</h2>
+    <div class="form-box">
+      <h3>Generate Invoice</h3>
+      <input id="po_id" type="number" placeholder="PO ID"/>
+      <button onclick="createInvoice()">Generate Invoice</button>
+    </div>
+    <table>
+      <thead><tr><th>Invoice No</th><th>PO ID</th><th>Amount</th><th>Tax</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="invoice-list"></tbody>
+    </table>
+  </div>
+  <script src="js/api.js"></script>
+  <script>
+    async function createInvoice() {
+      const res = await apiFetch("/invoices/", "POST", {
+        po_id: parseInt(document.getElementById("po_id").value)
+      });
+      alert(res.invoice_number ? `Invoice: ${res.invoice_number}` : JSON.stringify(res));
+      loadInvoices();
+    }
+    async function loadInvoices() {
+      const invoices = await apiFetch("/invoices/");
+      document.getElementById("invoice-list").innerHTML = invoices.map(inv => `
+        <tr>
+          <td>${inv.invoice_number}</td><td>${inv.po_id}</td>
+          <td>₹${inv.amount.toFixed(2)}</td><td>₹${inv.tax.toFixed(2)}</td>
+          <td>₹${inv.total.toFixed(2)}</td><td>${inv.status}</td>
+          <td>
+            <a href="http://localhost:8000/invoices/${inv.id}/pdf" target="_blank">
+              <button>📄 PDF</button>
+            </a>
+          </td>
+        </tr>`).join("");
+    }
+    function logout() { localStorage.clear(); window.location.href = "index.html"; }
+    loadInvoices();
+  </script>
+</body>
+</html>
